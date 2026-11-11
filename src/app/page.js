@@ -186,6 +186,25 @@ function Home() {
     if (error) load();
   }, [load]);
 
+  const handleSaveNote = useCallback(async (noteId, { title, bullets }) => {
+    const { data, error } = await getSupabase()
+      .from('notes')
+      .update({ title, bullets })
+      .eq('id', noteId)
+      .select(NOTE_FIELDS)
+      .single();
+    if (error) throw error;
+
+    // Single source of truth stays the fetched row; every local view of this
+    // note updates together (rail, dialog, saved-status line).
+    setNotes((prev) => prev.map((item) => (item.id === noteId ? data : item)));
+    setDialogNote((prev) => (prev && prev.id === noteId ? data : prev));
+    setStatus((prev) =>
+      prev?.kind === 'saved' && prev.note?.id === noteId ? { ...prev, note: data } : prev
+    );
+    return data;
+  }, []);
+
   const signOut = useCallback(async () => {
     await getSupabase().auth.signOut();
     router.replace('/login');
@@ -300,6 +319,7 @@ function Home() {
         open={Boolean(dialogNote)}
         onClose={() => setDialogNote(null)}
         onDelete={handleDeleteNote}
+        onSave={handleSaveNote}
       />
     </div>
   );
