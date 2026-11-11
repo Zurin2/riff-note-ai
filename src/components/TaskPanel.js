@@ -5,7 +5,7 @@ import TaskRow from './TaskRow';
 const CATEGORY_ORDER = ['work', 'school', 'personal', 'other'];
 const CATEGORY_LABELS = { work: 'Work', school: 'School', personal: 'Personal', other: 'Other' };
 
-export default function TaskPanel({ tasks, loading, onToggle, onRemove }) {
+export default function TaskPanel({ tasks, loading, onToggle, onRemove, onEdit }) {
   const openCount = tasks.filter((task) => !task.done).length;
 
   const groups = CATEGORY_ORDER.map((category) => {
@@ -48,7 +48,7 @@ export default function TaskPanel({ tasks, loading, onToggle, onRemove }) {
               </div>
               <div className="divide-y divide-border/50">
                 {group.items.map((task) => (
-                  <TaskRow key={task.id} task={task} onToggle={onToggle} onRemove={onRemove} />
+                  <TaskRow key={task.id} task={task} onToggle={onToggle} onRemove={onRemove} onEdit={onEdit} />
                 ))}
               </div>
             </div>
