@@ -177,6 +177,25 @@ function Home() {
     if (error) setTasks(previous);
   }, []);
 
+  // Optimistic edit with revert — same contract as toggle/remove. Only the
+  // three editable fields are sent; the fetched row refreshes local state.
+  const handleEditTask = useCallback(async (id, patch) => {
+    const previous = tasksRef.current;
+    setTasks((prev) => prev.map((task) => (task.id === id ? { ...task, ...patch } : task)));
+    if (String(id).startsWith('local-')) return;
+    const { data, error } = await getSupabase()
+      .from('tasks')
+      .update({ title: patch.title, priority: patch.priority, category: patch.category })
+      .eq('id', id)
+      .select(TASK_FIELDS)
+      .single();
+    if (error) {
+      setTasks(previous);
+      throw error;
+    }
+    setTasks((prev) => prev.map((task) => (task.id === id ? data : task)));
+  }, []);
+
   const handleDeleteNote = useCallback(async (note) => {
     setDialogNote(null);
     setNotes((prev) => prev.filter((item) => item.id !== note.id));
@@ -258,7 +277,13 @@ function Home() {
         />
       ) : null}
 
-      <TaskPanel tasks={tasks} loading={loading} onToggle={handleToggle} onRemove={handleRemove} />
+      <TaskPanel
+        tasks={tasks}
+        loading={loading}
+        onToggle={handleToggle}
+        onRemove={handleRemove}
+        onEdit={handleEditTask}
+      />
 
       {/* composer */}
       <div className="mt-6">
