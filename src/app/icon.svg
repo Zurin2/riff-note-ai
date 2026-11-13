@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" fill="none">
+  <defs>
+    <!-- Soft Paper Background Gradient -->
+    <linearGradient id="riffPaperBg" x1="24" y1="24" x2="232" y2="232" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FDF8EE" />
+      <stop offset="100%" stop-color="#F7E8CF" />
+    </linearGradient>
+
+    <!-- Warm Amber to Terracotta Stroke Gradient -->
+    <linearGradient id="riffStrokeGrad" x1="60" y1="36" x2="196" y2="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D97706" />
+      <stop offset="50%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#C2410C" />
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded App Icon Background (Remove this <rect> if you want a transparent icon) -->
+  <rect x="8" y="8" width="240" height="240" rx="54" fill="url(#riffPaperBg)" />
+
+  <g stroke="url(#riffStrokeGrad)" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Top Loop of R + Soundwave Crossbar + Left Vertical Stem -->
+    <path d="M 74 114
+         V 54
+         C 74 44, 80 38, 90 38
+         H 146
+         C 178 38, 198 60, 198 90
+         C 198 114, 184 132, 162 140
+         L 198 206
+         C 201 211, 198 216, 192 216
+         H 164
+         C 159 216, 155 213, 152 208
+         L 118 148" />
+
+    <!-- Bottom Left Notebook Spine & Foot of R -->
+    <path d="M 74 134
+         V 200
+         C 74 210, 80 216, 90 216
+         H 106
+         V 154" />
+
+    <!-- Continuous Audio Soundwave Across the Center -->
+    <path d="M 74 126
+         H 88
+         C 94 126, 96 106, 101 106
+         C 106 106, 107 148, 112 148
+         C 118 148, 121 74, 127 74
+         C 133 74, 134 136, 139 136
+         C 143 136, 144 96, 148 96
+         C 152 96, 154 142, 160 142
+         C 166 142, 169 98, 175 98
+         C 180 98, 181 124, 186 124
+         C 190 124, 192 110, 196 110" />
+
+    <!-- Equalizer Bars Inside the R Leg -->
+    <line x1="152" y1="208" x2="152" y2="174" />
+    <line x1="166" y1="216" x2="166" y2="184" />
+    <line x1="180" y1="216" x2="180" y2="198" />
+
+    <!-- 4 Notebook Spiral Binding Rings -->
+    <line x1="60" y1="68" x2="82" y2="68" />
+    <line x1="60" y1="106" x2="82" y2="106" />
+    <line x1="60" y1="144" x2="82" y2="144" />
+    <line x1="60" y1="182" x2="82" y2="182" />
+  </g>
+
+  <!-- Binding Punch Holes -->
+  <g fill="url(#riffStrokeGrad)">
+    <circle cx="83" cy="68" r="5" />
+    <circle cx="83" cy="106" r="5" />
+    <circle cx="83" cy="144" r="5" />
+    <circle cx="83" cy="182" r="5" />
+  </g>
+</svg>
