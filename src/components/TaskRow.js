@@ -147,20 +147,13 @@ export default function TaskRow({ task, onToggle, onRemove, onEdit }) {
         ) : null}
       </button>
 
-      <button
-        type="button"
-        onClick={startEditing}
-        title="Edit to-do"
-        className="flex-1 text-left min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 rounded"
+      <p
+        className={`flex-1 min-w-0 text-sm leading-snug ${
+          task.done ? 'line-through text-muted-foreground' : 'text-foreground'
+        }`}
       >
-        <p
-          className={`text-sm leading-snug transition-colors duration-150 ease-out ${
-            task.done ? 'line-through text-muted-foreground' : 'text-foreground hover:text-[hsl(18_54%_47%)]'
-          }`}
-        >
-          {task.title}
-        </p>
-      </button>
+        {task.title}
+      </p>
 
       <div className="flex items-center gap-1.5 shrink-0">
         {task.priority === 'high' && !task.done ? (
