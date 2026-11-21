@@ -1,13 +1,47 @@
 import { createClient } from '@/utils/supabase/server';
 import { buildPrompt, toGeminiSchema, ORGANIZING_SCHEMA, organizeSanitize } from '@/lib/organizer';
 
-// The organizing brain. One stateless LLM call per ramble — no chat memory,
+const RATE_LIMIT = 30; // organizes per user per window
+const RATE_WINDOW_MS = 60_000;
+
+// Soft per-user throttle so one account can't drain the Gemini quota.
+// Fails open by design: if the table is missing or the query errors, the
+// request proceeds exactly as it did before this check existed.
+async function isRateLimited(supabase, userId) {
+  try {
+    const since = new Date(Date.now() - RATE_WINDOW_MS).toISOString();
+    const { count, error } = await supabase
+      .from('organize_calls')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .gte('created_at', since);
+    if (error) return false;
+    if ((count || 0) >= RATE_LIMIT) return true;
+
+    const { error: insertError } = await supabase.from('organize_calls').insert({ user_id: userId });
+    if (insertError) return false;
+    // Opportunistic trim so the table never grows past one window per user.
+    await supabase.from('organize_calls').delete().lt('created_at', since);
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+// The organizing brain. One stateless LLM call per ramble - no chat memory,
 // no web grounding. The Gemini key lives only here, server-side.
 export async function POST(request) {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth?.user) {
     return Response.json({ error: 'Not signed in.' }, { status: 401 });
+  }
+
+  if (await isRateLimited(supabase, auth.user.id)) {
+    return Response.json(
+      { error: 'Too many requests. Give it a minute, then try again.' },
+      { status: 429, headers: { 'Retry-After': '60' } }
+    );
   }
 
   let text = '';

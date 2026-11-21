@@ -67,3 +67,20 @@ create index if not exists notes_user_created_idx    on public.notes    (user_id
 create index if not exists tasks_note_user_idx       on public.tasks    (user_id, created_at desc);
 create index if not exists tasks_note_id_idx         on public.tasks    (note_id);
 create index if not exists messages_user_created_idx on public.messages (user_id, created_at desc);
+
+-- rate ledger for /api/organize (30 calls per user per 60s)
+-- Optional: the route fails open (no throttle) if this table is absent, so the
+-- app keeps working before this block is applied.
+create table if not exists public.organize_calls (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+alter table public.organize_calls enable row level security;
+
+create policy "organize_calls owner select" on public.organize_calls for select to authenticated using (user_id = auth.uid());
+create policy "organize_calls owner insert" on public.organize_calls for insert to authenticated with check (user_id = auth.uid());
+create policy "organize_calls owner delete" on public.organize_calls for delete to authenticated using (user_id = auth.uid());
+
+create index if not exists organize_calls_user_created_idx on public.organize_calls (user_id, created_at desc);

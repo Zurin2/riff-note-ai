@@ -38,7 +38,8 @@ cp .env.local .env.local   # then fill in real values (already generated; fill S
 
 1. Create a project at [supabase.com](https://supabase.com) (free tier is enough).
 2. SQL Editor → paste **`supabase/schema.sql`** → Run. Creates `notes`, `tasks`, `messages`
-   with owner-only RLS policies and helpful indexes.
+   with owner-only RLS policies and helpful indexes, plus the optional `organize_calls`
+   throttle ledger (if you skip that block the app still works — the rate limit fails open).
 3. Authentication → Providers → Email: enabled. Turn **email confirmation** OFF if you want
    instant sign-in after register (default ON sends a confirm email — the register page handles both).
 4. Copy the URL + publishable key (Supabase's new name for the anon key) into `.env.local`,
@@ -64,6 +65,23 @@ Three owner-scoped tables (schema in `supabase/schema.sql`):
 
 Ownership is stamped automatically by a column default (`auth.uid()`); RLS enforces every
 read/update/delete against the same rule with **no admin bypass**.
+
+`organize_calls` (optional) is a per-user ledger used only by `/api/organize` to throttle
+30 calls per 60 seconds per account. Absent table ⇒ no throttle, no errors.
+
+## Security
+
+- **Boundary:** Postgres RLS. The browser only ever holds the publishable key; no
+  service-role key exists in this repo or in Vercel env vars.
+- **Headers** (`next.config.mjs`): CSP with `frame-ancestors 'none'`, `object-src 'none'`,
+  `base-uri 'self'`, `form-action 'self'`; `X-Content-Type-Options: nosniff`;
+  `X-Frame-Options: DENY`; `Referrer-Policy: strict-origin-when-cross-origin`;
+  `Permissions-Policy` (microphone kept for the Web Speech composer); HSTS 2 years.
+  `script-src` allows `'unsafe-inline'` because Next.js ships inline bootstrap scripts —
+  the app has no HTML sinks, so this is the deliberate trade-off.
+- **LLM route:** `/api/organize` requires a session, caps input at 6,000 chars, keeps the
+  Gemini key server-side, and returns only `organizeSanitize` output (fixed enums, no HTML).
+- **No debug endpoints ship to production.** `next build` exposes only `/api/organize`.
 
 ## Deploy to Vercel
 
